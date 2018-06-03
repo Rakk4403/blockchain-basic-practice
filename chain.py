@@ -3,7 +3,7 @@ import hashlib
 import json
 import random
 import sys
-from typing import Dict
+from typing import Any, Dict, List
 from pprint import pprint
 
 
@@ -41,7 +41,7 @@ def check_block_validity(block: Dict, parent: Dict, state: Dict) -> Dict:
     return state
 
 
-def check_chain(chain: list) -> bool:
+def check_chain(chain: Any) -> Any:
     if isinstance(chain, str):
         try:
             chain = json.loads(chain)
@@ -51,7 +51,7 @@ def check_chain(chain: list) -> bool:
     elif isinstance(chain, list):
         return False
 
-    state = {}
+    state = {}  # type: Dict['str', 'str']
 
     for txn in chain[0]['contents']['txns']:
         state = update_state(txn, state)
@@ -64,7 +64,7 @@ def check_chain(chain: list) -> bool:
     return state
 
 
-def hash_me(msg: str = "") -> str:
+def hash_me(msg: Any = '') -> str:
     if not isinstance(msg, str):
         msg = json.dumps(msg, sort_keys=True)
 
@@ -169,7 +169,7 @@ if __name__ == '__main__':
     while len(txn_buffer) > 0:
         buffer_start_size = len(txn_buffer)
 
-        txn_list = []
+        txn_list = []  # type: List[Dict]
         while (len(txn_buffer) > 0) and (len(txn_list) < block_size_limit):
             new_txn = txn_buffer.pop()
             valid_txn = is_valid_txn(new_txn, state)
