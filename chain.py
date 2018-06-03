@@ -193,7 +193,7 @@ if __name__ == '__main__':
     pprint(state)
 
     print('=== Check chain')
-    print(check_chain(chain))
+    print(check_chain(chain))  # False
 
     chain_as_text = json.dumps(chain, sort_keys=True)
     print(check_chain(chain_as_text))
