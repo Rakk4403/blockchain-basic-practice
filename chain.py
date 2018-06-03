@@ -6,6 +6,63 @@ import sys
 from typing import Dict
 
 
+def check_block_hash(block: Dict) -> None:
+    expected_hash = hash_me(block['contents'])
+
+    if block['hash'] is not expected_hash:
+        raise Exception('Hash does not match contetns of block {}'
+                        .format(block['contents']['block_number']))
+    return
+
+
+def check_block_validity(block: Dict, parent: Dict, state: Dict) -> Dict:
+    parent_number = parent['contents']['block_number']
+    parent_hash = parent['hash']
+    block_number = block['contents']['block_number']
+
+    for txn in block['contents']['txns']:
+        if is_valid_txn(txn, state):
+            state = update_state(txn, state)
+        else:
+            raise Exception('Invalid transaction in block {}: {}'.format(
+                block_number, txn))
+
+    check_block_hash(block)
+
+    if block_number is not (parent_number + 1):
+        raise Exception('Hash does not match contents of block {}'
+                        .format(block_number))
+
+    if block['contents']['parent_hash'] is not parent_hash:
+        raise Exception('Parent hash not accurate at block {}'
+                        .format(block_number))
+
+    return state
+
+
+def check_chain(chain: list) -> bool:
+    if isinstance(chain, str):
+        try:
+            chain = json.loads(chain)
+            assert(type(chain) == list)
+        except:
+            return False
+    elif isinstance(chain, list):
+        return False
+
+    state = {}
+
+    for txn in chain[0]['contents']['txns']:
+        state = update_state(txn, state)
+    check_block_hash(chain[0])
+    parent = chain[0]
+
+    for block in chain[1:]:
+        state = check_block_validity(block, parent, state)
+        parent = block
+    return state
+
+
 def hash_me(msg: str = "") -> str:
     if not isinstance(type(msg), str):
         msg = json.dumps(msg, sort_keys=True)
@@ -133,3 +190,9 @@ if __name__ == '__main__':
     pprint(chain[1])
     print('state:')
     pprint(state)
+
+    print('=== Check chain')
+    print(check_chain(chain))
+
+    chain_as_text = json.dumps(chain, sort_keys=True)
+    print(check_chain(chain_as_text))
