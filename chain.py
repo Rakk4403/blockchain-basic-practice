@@ -1,9 +1,10 @@
+import copy
 import hashlib
 import json
-from pprint import pprint
 import random
 import sys
 from typing import Dict
+from pprint import pprint
 
 
 def check_block_hash(block: Dict) -> None:
@@ -196,3 +197,20 @@ if __name__ == '__main__':
 
     chain_as_text = json.dumps(chain, sort_keys=True)
     print(check_chain(chain_as_text))
+
+    print('=== Architecture')
+    node_chain = copy.copy(chain)
+    node_txns = [make_transaction() for i in range(5)]
+    new_block = make_block(node_txns, node_chain)
+
+    print("Blockchain on Node A is currently {} blocks long"
+          .format(len(chain)))
+
+    try:
+        print("New Block Received; checking validity...")
+        state = check_block_validity(new_block, chain[-1], state)
+        chain.append(new_block)
+    except:
+        print("Invalid block; ignoring and waiting for the next block...")
+
+    print("Blockchain on Node A is now {} blocks long".format(len(chain)))
