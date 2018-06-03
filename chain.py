@@ -9,7 +9,7 @@ from typing import Dict
 def check_block_hash(block: Dict) -> None:
     expected_hash = hash_me(block['contents'])
 
-    if block['hash'] is not expected_hash:
+    if block['hash'] != expected_hash:
         raise Exception('Hash does not match contetns of block {}'
                         .format(block['contents']['block_number']))
     return
@@ -24,16 +24,16 @@ def check_block_validity(block: Dict, parent: Dict, state: Dict) -> Dict:
         if is_valid_txn(txn, state):
             state = update_state(txn, state)
         else:
-            raise Exception('Invalid transaction in block {}: {}'.format(
-                block_number, txn))
+            raise Exception('Invalid transaction in block {}: {}'
+                            .format(block_number, txn))
 
     check_block_hash(block)
 
-    if block_number is not (parent_number + 1):
+    if block_number != (parent_number + 1):
         raise Exception('Hash does not match contents of block {}'
                         .format(block_number))
 
-    if block['contents']['parent_hash'] is not parent_hash:
+    if block['contents']['parent_hash'] != parent_hash:
         raise Exception('Parent hash not accurate at block {}'
                         .format(block_number))
 
@@ -64,7 +64,7 @@ def check_chain(chain: list) -> bool:
 
 
 def hash_me(msg: str = "") -> str:
-    if not isinstance(type(msg), str):
+    if not isinstance(msg, str):
         msg = json.dumps(msg, sort_keys=True)
 
     return hashlib.sha256(str(msg).encode('utf-8')).hexdigest()
